@@ -1,104 +1,114 @@
-<!--horizontal divider(gradiant)-->
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
-
-<!--h1 without bottom border-->
-<div id="user-content-toc">
-  <ul align="center">
-    <summary><h1 style="display: inline-block">Hi 👋, I'm Pablo Nicolás</h1></summary>
-  </ul>
-</div>
-
-<!-- Snake animation -->
 <div align="center">
-  <img src="https://github.com/1999AZZAR/1999AZZAR/blob/readme/resources/img/grid-snake.svg" alt="snake" />
+
+<img src="./assets/terminal.svg" width="100%" alt="Animated terminal: whoami prints the SLYLEM0 banner, fastfetch shows Omarchy, Hyprland and my stack, then 'Math, Logic & Cybersecurity are my playgrounds'." />
+
+<br/>
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-pablo--nicolas--marin-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/pablo-nicolas-marin)
+[![Instagram](https://img.shields.io/badge/Instagram-pablit0__clavito____-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/pablit0_clavito__/)
+[![Email](https://img.shields.io/badge/Email-pnicolasmarin2007%40gmail.com-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:pnicolasmarin2007@gmail.com)
+
 </div>
 
-<!--h2 without bottom border-->
-<div id="user-content-toc">
-  <ul align="center">
-    <summary><h2 style="display: inline-block">"Math, Logic & Cybersecurity are my playgrounds 🔐📐"</h2></summary>
-  </ul>
-</div>
+## `> cat about.md`
 
-<!--Intro start-->
-- 🎓 I'm an **Engineering Systems Student** at *Universidad del Valle (Colombia)*  
-- 💻 I love **programming, electronics, and technology innovation**  
-- 🧮 Passionate about **Mathematics, Algorithms, and Logical Thinking**  
-- 🔒 Interested in **Cybersecurity**, ethical hacking, and Linux-based systems  
-- 🧰 I’ve worked with **Python, C++, Java, Arduino, Raspberry Pi, JSON, and Git**  
-- 🧠 I use **MATLAB** for mathematical modeling and analysis  
-- ⚙️ Currently learning **advanced cybersecurity and automation with Python**  
-- 📫 Reach me at **pablonicolas.dev@gmail.com**  
-- 🏠 You can also find me on Discord – [PabloNicolas](https://discordapp.com/users/)  
+```yaml
+name:      Pablo Nicolás Marín
+studying:  Systems Engineering @ Universidad del Valle (Colombia)
+community: AWS Student Builder Group @ Univalle
+building:  serverless apps on AWS, Linux tooling, algorithms
+into:      math, logic, cybersecurity, a little bit of quantum
+learning:  Go
+daily:     Omarchy · Hyprland · Neovim · tmux
+```
 
-<!--Intro end-->
+## `> ls ~/projects --featured`
 
-<!--- stats & Trophy (start) -->
-<p align="center">
-<table align="center">
-<tr border="none">
-<td width="50%" align="center">
+<table>
+<tr>
+<td width="50%" valign="top">
 
-  <img align="center" src="https://github-readme-stats.vercel.app/api?username=pablonicolas&theme=dark&show_icons=true&count_private=true" />
-  <br><br>
-  <img title="🔥 Streak stats" alt="GitHub streak" src="https://github-readme-streak-stats.herokuapp.com/?user=pablonicolas&theme=dark&hide_border=false" /> 
+### 💈 [Shaggy Barber](https://d2ficupb35lp6p.cloudfront.net)
+
+Production booking platform for a real barbershop. Serverless on AWS with infrastructure as code: online booking with **no double booking**, WhatsApp notices and reminders, passwordless customer accounts and an admin panel with MFA, live agenda and stats.
+
+`Astro` `TypeScript` `Tailwind` `Lambda` `DynamoDB` `API Gateway` `Cognito` `EventBridge` `CDK` `GitHub Actions`
 
 </td>
+<td width="50%" valign="top">
 
-<td width="50%" align="center">
-  <img align="center" src="https://github-readme-stats.vercel.app/api/top-langs/?username=pablonicolas&theme=dark&hide_border=false&no-bg=true&no-frame=true&langs_count=10"/>
+### 🩺 [Dr. Cloud](https://github.com/Slylem0/AWS-Weekend-challenge)
+
+First aid for AWS errors. Paste the error and an AI agent answers with a diagnosis, a step-by-step prescription and a check-up. Least-privilege by design; never suggests `"Action": "*"`.
+
+`Amazon Bedrock` `Strands Agents` `Streamlit` `App Runner` `ECR` `IAM`
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### 🖥️ [Display Switch for Omarchy](https://github.com/Slylem0/omarchy-display-switch)
+
+<kbd>Win</kbd>+<kbd>P</kbd> for Hyprland: PC only, duplicate, extend or second
+screen only. Rotation, scale and brightness remembered **per display** (by EDID), not per port.
+
+`QML` `Shell` `JavaScript` `Hyprland`
+
+</td>
+<td width="50%" valign="top">
+
+### 🎲 [Quantum Dice](https://github.com/Slylem0/quantum_dice)
+
+Randomness certified by physics: measure a Bell (CHSH) violation on IonQ and turn it into a bound on unpredictability, then extract the bits with Toeplitz hashing. Built for the Qollab × IonQ hackathon 2026.
+
+`Python` `Qiskit` `IonQ` `JavaScript`
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### 🤖 [AWS Daily Topic Agent](https://github.com/Slylem0/aws-daily-topic-agent)
+
+Autonomous agent that publishes a bilingual AWS Cloud Practitioner topic every morning for my university's Builder Group. Zero human input.
+
+`EventBridge Scheduler` `Lambda` `Bedrock (Nova)` `S3`
+
+</td>
+<td width="50%" valign="top">
+
+### 🧮 [Compressed-range query engine](https://github.com/Slylem0/ADA_final_project)
+
+Answers queries and updates over huge sequences stored as compressed ranges, without ever expanding them. Algorithm analysis final project.
+
+`C++` `Algorithms` `Data structures`
+
 </td>
 </tr>
 </table>
 
-<!--- trophy (start) -->
-<div align=center>
-  <a href="https://github.com/ryo-ma/github-profile-trophy">
-      <img align="center" width="84%" src="https://github-profile-trophy.vercel.app/?username=pablonicolas&theme=radical&row=1&column=7&margin-h=15&margin-w=5&no-bg=true" alt="TROPHY" />
-  </a>
-</div>
-<!--- trophy (end) -->
-</p>
-
-<!--h1 without bottom border-->
-<div id="user-content-toc">
-  <ul align="center">
-    <summary><h2 style="display: inline-block">Technologies & Tools ⚙️</h2></summary>
-  </ul>
-</div>
-
-<!--tech stack icons-->
-<p align="center">
-  <a href="https://skillicons.dev">
-    <img src="https://skillicons.dev/icons?i=py,cpp,java,matlab,arduino,raspberrypi,linux,git,github,html,css,js,customtkinter,vscode,postman,bash,json&perline=10" />
-  </a>
-</p>
-
-<!-- Connect with me -->
-<div id="user-content-toc">
-  <ul align="center">
-    <summary><h2 style="display: inline-block">Let's Connect 🤝</h2></summary>
-  </ul>
-</div>
+## `> which --all tools`
 
 <p align="center">
-<a href="[https://www.linkedin.com/in/](https://www.linkedin.com/in/pablo-nicolas-marin-gonzalez-33b8042a1)" target="blank"><img align="center" src="https://user-images.githubusercontent.com/88904952/234979284-68c11d7f-1acc-4f0c-ac78-044e1037d7b0.png" alt="linkedin" height="50" width="50" /></a>
-<a href="https://x.com/" target="blank"><img align="center" src="https://user-images.githubusercontent.com/88904952/234980676-61bfb021-ecc8-48f7-88e6-34c1b06c4a58.png" alt="twitter" height="50" width="50" /></a> 
-<a href="[https://instagram.com/](https://www.instagram.com/el_buhoder)" target="blank"><img align="center" src="https://user-images.githubusercontent.com/88904952/234981169-2dd1e58f-4b7e-468c-8213-034ba62156c3.png" alt="instagram" height="50" width="50" /></a>
-<a href="https://discordapp.com/users/" target="blank"><img align="center" src="https://user-images.githubusercontent.com/88904952/234982627-019fd336-6248-453c-9b05-97c13fd1d207.png" alt="discord" height="50" width="50" /></a>
+  <img src="https://skillicons.dev/icons?i=ts,astro,tailwind,nodejs,py,cpp,c,java,go,aws,githubactions,docker&perline=12" alt="TypeScript, Astro, Tailwind, Node.js, Python, C++, C, Java, Go, AWS, GitHub Actions, Docker" />
+  <br/>
+  <img src="https://skillicons.dev/icons?i=linux,arch,neovim,bash,git,qt,matlab,raspberrypi,md&perline=12" alt="Linux, Arch, Neovim, Bash, Git, Qt, MATLAB, Raspberry Pi, Markdown" />
 </p>
 
-<!--profile visit count-->
-<div align="center">
-  
-[![](https://visitcount.itsvg.in/api?id=pablonicolas&icon=3&color=6)](https://visitcount.itsvg.in)
-  
-</div>
+## `> git log --stat`
 
-<!--horizontal divider(gradiant)-->
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
+<p align="center">
+  <img height="165" src="https://github-readme-stats.vercel.app/api?username=Slylem0&show_icons=true&count_private=true&theme=tokyonight&hide_border=true&bg_color=0d1117&disable_animations=true" alt="GitHub stats" />
+  <img height="165" src="https://github-readme-stats.vercel.app/api/top-langs/?username=Slylem0&layout=compact&langs_count=8&theme=tokyonight&hide_border=true&bg_color=0d1117&disable_animations=true" alt="Top languages" />
+  <br/>
+  <img src="https://streak-stats.demolab.com?user=Slylem0&theme=tokyonight&hide_border=true&background=0d1117&disable_animations=true" alt="Contribution streak" />
+</p>
 
-----------------------------------------------------------------------
-🧠 **Credit:** [Pablo Nicolás](https://github.com/pablonicolas)  
-🕓 *Last Edited on:* 12/10/2025
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Slylem0/Slylem0/output/github-snake-dark.svg" />
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Slylem0/Slylem0/output/github-snake.svg" />
+  <img alt="Snake eating my contribution graph" src="https://raw.githubusercontent.com/Slylem0/Slylem0/output/github-snake-dark.svg" />
+</picture>
 
+<p align="center"><sub><code>while (alive) { coffee++; code(); }</code></sub></p>
