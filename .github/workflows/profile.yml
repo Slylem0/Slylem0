@@ -35,6 +35,8 @@ jobs:
         with:
           body: white
           output-dir: koi-white
+      - name: Clear git-koi's download so it can run again
+        run: rm -rf "$RUNNER_TEMP/git-koi"
       - name: Koi (black)
         uses: yalongwastaken/git-koi@v1
         with:
