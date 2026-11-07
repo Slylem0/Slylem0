@@ -1,114 +1,54 @@
 <div align="center">
 
-<img src="./assets/terminal.svg" width="100%" alt="Animated terminal: whoami prints the SLYLEM0 banner, fastfetch shows Omarchy, Hyprland and my stack, then 'Math, Logic & Cybersecurity are my playgrounds'." />
+<img src="./assets/terminal.svg" width="100%" alt="Ghostty terminal on Omarchy with the Nord theme: fastfetch shows the Omarchy logo with my profile, software and AWS stack, then cat now.md shows what I am working on." />
 
 <br/>
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-pablo--nicolas--marin-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/pablo-nicolas-marin)
-[![Instagram](https://img.shields.io/badge/Instagram-pablit0__clavito____-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/pablit0_clavito__/)
-[![Email](https://img.shields.io/badge/Email-pnicolasmarin2007%40gmail.com-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:pnicolasmarin2007@gmail.com)
+[![Portfolio](https://img.shields.io/badge/Portfolio-main.dx1vkp1smlyu7.amplifyapp.com-2E3440?style=flat-square&logo=awsamplify&logoColor=88C0D0)](https://main.dx1vkp1smlyu7.amplifyapp.com)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-pablo--nicolas--marin-2E3440?style=flat-square&logo=linkedin&logoColor=88C0D0)](https://www.linkedin.com/in/pablo-nicolas-marin)
+[![Email](https://img.shields.io/badge/Email-pnicolasmarin2007%40gmail.com-2E3440?style=flat-square&logo=gmail&logoColor=88C0D0)](mailto:pnicolasmarin2007@gmail.com)
+[![Instagram](https://img.shields.io/badge/Instagram-pablit0__clavito____-2E3440?style=flat-square&logo=instagram&logoColor=88C0D0)](https://www.instagram.com/pablit0_clavito__/)
 
 </div>
 
-## `> cat about.md`
+## `$ cat about.yaml`
 
 ```yaml
 name:      Pablo Nicolás Marín
-studying:  Systems Engineering @ Universidad del Valle (Colombia)
-community: AWS Student Builder Group @ Univalle
-building:  serverless apps on AWS, Linux tooling, algorithms
-into:      math, logic, cybersecurity, a little bit of quantum
-learning:  Go
-daily:     Omarchy · Hyprland · Neovim · tmux
+location:  Buga, Colombia
+studying:  Systems Engineering, Universidad del Valle
+certified: AWS Certified Cloud Practitioner
+community: AWS Student Builder Group Univalle (Partnerships & Academy Lead)
+focus:     serverless backends on AWS, AI agents on Amazon Bedrock, Linux tooling
+into:      math, logic, algorithms, cybersecurity, a little bit of quantum
+next:      AWS Certified AI Practitioner
 ```
 
-## `> ls ~/projects --featured`
+## `$ ls ~/projects --sort=recent`
 
-<table>
-<tr>
-<td width="50%" valign="top">
+| Project | What it does | Stack |
+|---|---|---|
+| **[SEE YOU SPACE BUILDER](https://github.com/Slylem0/portafolio)**<br/><sub>[live](https://main.dx1vkp1smlyu7.amplifyapp.com)</sub> | My portfolio for the AWS Student Builder Challenge. A secret Hyprland-style desktop with a working terminal, and TRIAD: three AI cores on Amazon Bedrock that vote on any question. | `Astro` `React` `Amplify` `Lambda` `Bedrock` `DynamoDB` |
+| **[Shaggy Barber](https://d2ficupb35lp6p.cloudfront.net)**<br/><sub>live</sub> | Booking platform for a real barbershop: no double booking, WhatsApp reminders, passwordless accounts and an admin panel with MFA. | `Astro` `TypeScript` `CDK` `Lambda` `DynamoDB` `Cognito` `EventBridge` |
+| **[Grandma's Bouncer](https://github.com/Slylem0/grandmas-bouncer)**<br/><sub>[demo](https://youtu.be/OS2RwfqWgh8)</sub> | A guardrail that stops scam emails from hijacking an AI assistant that pays a 72-year-old's bills. | `Strands Agents` `Decider 2B` `Bedrock` |
+| **[Dr. Cloud](https://github.com/Slylem0/AWS-Weekend-challenge)** | First aid for AWS errors: paste an error, get a diagnosis, a step-by-step fix and a check-up. Least privilege by design. | `Bedrock` `Strands` `Streamlit` `App Runner` |
+| **[AWS Daily Topic Agent](https://github.com/Slylem0/aws-daily-topic-agent)** | Publishes a bilingual AWS Cloud Practitioner topic every morning for my university's Builder Group, with no human input. | `EventBridge Scheduler` `Lambda` `Bedrock` `S3` |
+| **[Omarchy Display Switch](https://github.com/Slylem0/omarchy-display-switch)**<br/><sub>11 stars</sub> | <kbd>Win</kbd>+<kbd>P</kbd> for Hyprland: PC only, duplicate, extend or second screen only, with rotation and scale remembered per display. | `QML` `Shell` `Hyprland` |
+| **[Quantum Dice](https://github.com/Slylem0/quantum_dice)** | Randomness certified by physics: a Bell (CHSH) violation measured on IonQ, turned into certified random bits. Qollab × IonQ hackathon 2026. | `Python` `Qiskit` `IonQ` |
+| **[Compressed-range query engine](https://github.com/Slylem0/ADA_final_project)** | Queries and updates over huge sequences stored as compressed ranges, without ever expanding them. | `C++` `Algorithms` |
 
-### 💈 [Shaggy Barber](https://d2ficupb35lp6p.cloudfront.net)
-
-Production booking platform for a real barbershop. Serverless on AWS with infrastructure as code: online booking with **no double booking**, WhatsApp notices and reminders, passwordless customer accounts and an admin panel with MFA, live agenda and stats.
-
-`Astro` `TypeScript` `Tailwind` `Lambda` `DynamoDB` `API Gateway` `Cognito` `EventBridge` `CDK` `GitHub Actions`
-
-</td>
-<td width="50%" valign="top">
-
-### 🩺 [Dr. Cloud](https://github.com/Slylem0/AWS-Weekend-challenge)
-
-First aid for AWS errors. Paste the error and an AI agent answers with a diagnosis, a step-by-step prescription and a check-up. Least-privilege by design; never suggests `"Action": "*"`.
-
-`Amazon Bedrock` `Strands Agents` `Streamlit` `App Runner` `ECR` `IAM`
-
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
-
-### 🖥️ [Display Switch for Omarchy](https://github.com/Slylem0/omarchy-display-switch)
-
-<kbd>Win</kbd>+<kbd>P</kbd> for Hyprland: PC only, duplicate, extend or second
-screen only. Rotation, scale and brightness remembered **per display** (by EDID), not per port.
-
-`QML` `Shell` `JavaScript` `Hyprland`
-
-</td>
-<td width="50%" valign="top">
-
-### 🎲 [Quantum Dice](https://github.com/Slylem0/quantum_dice)
-
-Randomness certified by physics: measure a Bell (CHSH) violation on IonQ and turn it into a bound on unpredictability, then extract the bits with Toeplitz hashing. Built for the Qollab × IonQ hackathon 2026.
-
-`Python` `Qiskit` `IonQ` `JavaScript`
-
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
-
-### 🤖 [AWS Daily Topic Agent](https://github.com/Slylem0/aws-daily-topic-agent)
-
-Autonomous agent that publishes a bilingual AWS Cloud Practitioner topic every morning for my university's Builder Group. Zero human input.
-
-`EventBridge Scheduler` `Lambda` `Bedrock (Nova)` `S3`
-
-</td>
-<td width="50%" valign="top">
-
-### 🧮 [Compressed-range query engine](https://github.com/Slylem0/ADA_final_project)
-
-Answers queries and updates over huge sequences stored as compressed ranges, without ever expanding them. Algorithm analysis final project.
-
-`C++` `Algorithms` `Data structures`
-
-</td>
-</tr>
-</table>
-
-## `> which --all tools`
+## `$ which --all tools`
 
 <p align="center">
-  <img src="https://skillicons.dev/icons?i=ts,astro,tailwind,nodejs,py,cpp,c,java,go,aws,githubactions,docker&perline=12" alt="TypeScript, Astro, Tailwind, Node.js, Python, C++, C, Java, Go, AWS, GitHub Actions, Docker" />
+  <img src="https://skillicons.dev/icons?i=aws,ts,astro,react,tailwind,nodejs,py,cpp,go,java&perline=10" alt="AWS, TypeScript, Astro, React, Tailwind, Node.js, Python, C++, Go, Java" />
   <br/>
-  <img src="https://skillicons.dev/icons?i=linux,arch,neovim,bash,git,qt,matlab,raspberrypi,md&perline=12" alt="Linux, Arch, Neovim, Bash, Git, Qt, MATLAB, Raspberry Pi, Markdown" />
+  <img src="https://skillicons.dev/icons?i=linux,arch,neovim,bash,git,githubactions,docker,qt&perline=10" alt="Linux, Arch, Neovim, Bash, Git, GitHub Actions, Docker, Qt" />
 </p>
 
-## `> git log --stat`
+## `$ git koi`
 
 <p align="center">
-  <img height="165" src="https://github-readme-stats.vercel.app/api?username=Slylem0&show_icons=true&count_private=true&theme=tokyonight&hide_border=true&bg_color=0d1117&disable_animations=true" alt="GitHub stats" />
-  <img height="165" src="https://github-readme-stats.vercel.app/api/top-langs/?username=Slylem0&layout=compact&langs_count=8&theme=tokyonight&hide_border=true&bg_color=0d1117&disable_animations=true" alt="Top languages" />
+  <img src="./koi/koi.gif" width="256" alt="My koi, redrawn every night from my GitHub activity: languages set its colours, contributions make it grow, streaks mark it." />
   <br/>
-  <img src="https://streak-stats.demolab.com?user=Slylem0&theme=tokyonight&hide_border=true&background=0d1117&disable_animations=true" alt="Contribution streak" />
+  <sub>Redrawn every night from my public activity by <a href="https://github.com/yalongwastaken/git-koi">git-koi</a>.</sub>
 </p>
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Slylem0/Slylem0/output/github-snake-dark.svg" />
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Slylem0/Slylem0/output/github-snake.svg" />
-  <img alt="Snake eating my contribution graph" src="https://raw.githubusercontent.com/Slylem0/Slylem0/output/github-snake-dark.svg" />
-</picture>
-
-<p align="center"><sub><code>while (alive) { coffee++; code(); }</code></sub></p>

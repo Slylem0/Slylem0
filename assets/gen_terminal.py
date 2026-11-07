@@ -1,192 +1,172 @@
-"""Genera assets/terminal.svg: una terminal animada (SMIL, sin JavaScript) para
-el README del perfil. GitHub muestra las animaciones SVG dentro de <img>.
+"""Generate assets/terminal.svg: an animated terminal for the profile README.
 
-Uso: python gen_terminal.py <ruta-salida.svg> <banner.txt>
+It mirrors my real setup: a Ghostty window tiled by Hyprland on Omarchy,
+Nord colours, my starship prompt and my fastfetch layout (Omarchy logo plus
+boxed sections). Animation is SMIL only, which GitHub renders inside <img>.
+
+Usage: python gen_terminal.py <out.svg> <omarchy-logo.txt>
 """
 import sys
 from html import escape
 
-OUT, BANNER = sys.argv[1], sys.argv[2]
+OUT, LOGO = sys.argv[1], sys.argv[2]
 
-T = 20.0  # duración del ciclo completo (s); luego vuelve a empezar
-W, LH, FS = 880, 19, 13.5
-X0, Y0 = 26, 70
+T = 16.0                       # full cycle (s), then it starts over
+W, LH, FS = 900, 19, 13
+X0, Y0 = 28, 44
+CW = 7.8                       # monospace cell width at FS 13 (JetBrains Mono)
 
-C = {
-    'bg': '#0d1117', 'bar': '#161b22', 'border': '#30363d', 'text': '#c9d1d9',
-    'dim': '#8b949e', 'green': '#7ee787', 'blue': '#79c0ff', 'gold': '#e3b341',
-    'arch': '#1793d1', 'red': '#ff7b72', 'purple': '#d2a8ff',
+N = {  # Nord
+    'bg': '#2e3440', 'bg2': '#3b4252', 'border': '#88c0d0', 'text': '#d8dee9',
+    'snow': '#eceff4', 'dim': '#616e88', 'frost': '#88c0d0', 'frost2': '#81a1c1',
+    'frost3': '#5e81ac', 'green': '#a3be8c', 'yellow': '#ebcb8b', 'orange': '#d08770',
+    'red': '#bf616a', 'purple': '#b48ead',
 }
-
 parts = []
 
 
-def show(t, end=0.975, attr='opacity'):
-    """Aparece en el segundo `t` y se queda hasta el final del ciclo."""
-    return (f'<animate attributeName="{attr}" values="0;1;0" keyTimes="0;{t / T:.4f};{end}" '
+def show(t, attr='opacity'):
+    """Appears at second t and stays until the end of the cycle."""
+    return (f'<animate attributeName="{attr}" values="0;1;0" keyTimes="0;{t / T:.4f};0.985" '
             f'dur="{T}s" repeatCount="indefinite" calcMode="discrete"/>')
 
 
 def letter(ch, t):
-    """Letra que aparece en `t` (fill-opacity: funciona en <tspan>, opacity no)."""
     ch = escape(ch) if ch != ' ' else '&#160;'
-    return f'<tspan fill-opacity="0">{ch}{show(t, attr="fill-opacity")}</tspan>'
+    return f'<tspan fill-opacity="0">{ch}{show(t, "fill-opacity")}</tspan>'
 
 
-def text(x, y, content, t, fill=None, extra=''):
-    fill_attr = f' fill="{fill}"' if fill else ''
-    parts.append(f'<text x="{x}" y="{y}" opacity="0"{fill_attr} {extra}>{content}{show(t)}</text>')
+def text(x, y, content, t, extra=''):
+    parts.append(f'<text x="{x:.1f}" y="{y}" opacity="0" xml:space="preserve" {extra}>{content}{show(t)}</text>')
 
 
-def prompt(line, t, cmd, step=0.075):
-    """Prompt que aparece en `t` y luego "teclea" `cmd` letra por letra."""
+def span(s, color, bold=False):
+    b = ' font-weight="700"' if bold else ''
+    return f'<tspan fill="{color}"{b}>{escape(s)}</tspan>'
+
+
+def prompt_spans(path='~'):
+    # starship: user, dir, then the arrow
+    return span('pablo ', N['snow'], True) + span(path + ' ', N['frost'], True) + span('❯ ', N['green'], True)
+
+
+def prompt(line, t, cmd, step=0.06):
     y = Y0 + line * LH
-    p = (f'<tspan fill="{C["green"]}" font-weight="700">pablo@slylem0</tspan>'
-         f'<tspan fill="{C["text"]}">:</tspan><tspan fill="{C["blue"]}" font-weight="700">~</tspan>'
-         f'<tspan fill="{C["text"]}">$ </tspan>')
-    # Prompt y letras en el mismo <text>: las letras siguen al prompt sin
-    # depender del ancho de la fuente.
-    letters = ''.join(letter(ch, t + 0.25 + i * step) for i, ch in enumerate(cmd))
-    parts.append(f'<text x="{X0}" y="{y}" opacity="0">{p}<tspan fill="{C["text"]}">{letters}</tspan>'
-                 f'{show(t)}</text>')
-    return t + 0.25 + len(cmd) * step
+    letters = ''.join(letter(ch, t + 0.3 + i * step) for i, ch in enumerate(cmd))
+    parts.append(f'<text x="{X0}" y="{y}" opacity="0" xml:space="preserve">{prompt_spans()}'
+                 f'<tspan fill="{N["text"]}">{letters}</tspan>{show(t)}</text>')
+    return t + 0.3 + len(cmd) * step + 0.35
 
 
+# 1. fastfetch -------------------------------------------------------------
 line = 0
-t = prompt(line, 0.5, 'whoami')
+t = prompt(line, 0.4, 'fastfetch')
 
-# Banner ANSI Shadow con brillo que recorre las letras.
-banner = [l.rstrip() for l in open(BANNER, encoding='utf-8').read().splitlines() if l.strip()]
-t += 0.3
-# Las letras de bloque necesitan un interlineado igual a la altura de la
-# fuente (con el de 19 px quedaban rayas entre filas).
-BLH = 15.5
-by = Y0 + (line + 1) * LH
-for i, row in enumerate(banner):
-    text(X0, by + i * BLH, escape(row), t + i * 0.07, 'url(#shine)',
-         'filter="url(#glow)" xml:space="preserve"')
-line += -(-int(len(banner) * BLH) // LH)  # filas de 19 px que ocupa el banner
-t += len(banner) * 0.07 + 0.25
-line += 1
-text(X0, Y0 + line * LH,
-     f'<tspan fill="{C["text"]}" font-weight="700">Pablo Nicolás Marín</tspan>'
-     f'<tspan fill="{C["dim"]}">  ·  Systems Engineering @ Universidad del Valle, Colombia</tspan>', t)
-line += 1
-text(X0, Y0 + line * LH,
-     f'<tspan fill="{C["dim"]}">cloud · linux · algorithms · math &amp; logic · a little bit of quantum</tspan>',
-     t + 0.15)
+logo = [r.rstrip('\n') for r in open(LOGO, encoding='utf-8').read().splitlines() if r.strip()]
+PX, PY = 4.0, 8.0               # one logo cell as a pixel block
+lx, ly = X0 + 4, Y0 + (line + 1) * LH + 2
+rects = []
+for r, row in enumerate(logo):
+    c = 0
+    while c < len(row):
+        if row[c] == '█':
+            s = c
+            while c < len(row) and row[c] == '█':
+                c += 1
+            rects.append(f'<rect x="{lx + s * PX:.1f}" y="{ly + r * PY:.1f}" width="{(c - s) * PX:.1f}" height="{PY:.1f}"/>')
+        else:
+            c += 1
+logo_h = len(logo) * PY
+parts.append(f'<g fill="{N["frost"]}" opacity="0">{"".join(rects)}{show(t)}</g>')
 
-# fastfetch con el logo de Arch.
-line += 2
-t = prompt(line, t + 0.6, 'fastfetch')
-logo = [
-    '        /\\',
-    '       /  \\',
-    '      /\\   \\',
-    '     /      \\',
-    '    /   ,,   \\',
-    '   /   |  |  -\\',
-    '  /_-\'\'    \'\'-_\\',
+BX = lx + 56 * PX + 34          # info column
+BOXW = 52                       # inner width in cells
+sections = [
+    ('Profile', [
+        ('', 'Name', 'Pablo Nicolás Marín'),
+        ('', 'Role', 'Cloud & Backend Builder'),
+        ('', 'Study', 'Systems Engineering · Universidad del Valle'),
+        ('', 'Cert', 'AWS Certified Cloud Practitioner'),
+        ('', 'Club', 'AWS Student Builder Group Univalle'),
+    ]),
+    ('Software', [
+        ('', 'OS', 'Omarchy (Arch Linux)'),
+        ('', 'WM', 'Hyprland (Wayland)'),
+        ('', 'Term', 'Ghostty · tmux · starship'),
+        ('', 'Editor', 'Neovim (LazyVim)'),
+        ('', 'Theme', 'Nord'),
+    ]),
+    ('Stack', [
+        ('', 'Cloud', 'Lambda · DynamoDB · Bedrock · CDK · Amplify'),
+        ('', 'Langs', 'TypeScript · Python · C++ · Go · Java'),
+    ]),
 ]
-info = [
-    ('pablo', '@slylem0'),
-    ('───────────────', None),
-    ('OS', 'Omarchy (Arch Linux) x86_64'),
-    ('WM', 'Hyprland'),
-    ('Terminal', 'Ghostty · tmux'),
-    ('Editor', 'Neovim (LazyVim)'),
-    ('Shell', 'bash + starship'),
-    ('Cloud', 'AWS · Lambda · DynamoDB · Bedrock · CDK'),
-    ('Langs', 'TypeScript · Python · C++ · Java · Go'),
-    ('Club', 'AWS Student Builder Group @ Univalle'),
+row = line + 1
+tt = t + 0.25
+BW = W - BX - 34                # box width in px
+for title, items in sections:
+    top = Y0 + row * LH - 5     # box top edge sits on the title's middle
+    bottom = Y0 + (row + len(items)) * LH + 9
+    tw = len(title) * CW + 14
+    tx = BX + (BW - tw) / 2
+    box = (f'<rect x="{BX}" y="{top}" width="{BW}" height="{bottom - top}" rx="3" fill="none" stroke="{N["dim"]}"/>'
+           f'<rect x="{tx:.1f}" y="{top - 8}" width="{tw:.1f}" height="16" fill="{N["bg"]}"/>'
+           f'<text x="{tx + 7:.1f}" y="{top + 4}" fill="{N["frost3"]}">{escape(title)}</text>')
+    parts.append(f'<g opacity="0">{box}{show(tt)}</g>')
+    tt += 0.08
+    row += 1
+    for i, (_, k, v) in enumerate(items):
+        content = span(f'{k:<7}', N['frost2'], True) + span(v, N['text'])
+        text(BX + 16, Y0 + row * LH, content, tt)
+        tt += 0.08
+        row += 1
+    row += 1
+row -= 1
+# Colour row, like fastfetch's palette module.
+pal = [N['red'], N['orange'], N['yellow'], N['green'], N['frost'], N['frost3'], N['purple'], N['snow']]
+row += 1
+dots = ''.join(f'<circle cx="{BX + 14 + j * 20}" cy="{Y0 + row * LH - 4}" r="5.5" fill="{c}"/>' for j, c in enumerate(pal))
+parts.append(f'<g opacity="0">{dots}{show(tt)}</g>')
+tt += 0.4
+info_bottom = Y0 + row * LH
+logo_bottom = ly + logo_h
+# center the logo against the info column
+shift = ((info_bottom - (Y0 + (line + 1) * LH)) - logo_h) / 2
+parts[1] = parts[1].replace('<g fill=', f'<g transform="translate(0 {shift:.1f})" fill=', 1)
+line = row + 1
+t = tt
+
+# 2. what I'm on now -------------------------------------------------------
+t = prompt(line, t, 'cat now.md')
+now = [
+    (N['frost'], '## now'),
+    (N['text'], '- Shipping serverless backends on AWS from a Linux terminal in Buga, Colombia.'),
+    (N['text'], '- Latest: SEE YOU SPACE BUILDER, my portfolio with Amazon Bedrock inside.'),
+    (N['text'], '- Next: AWS Certified AI Practitioner.'),
 ]
-t += 0.35
-first = line + 1
-for i, row in enumerate(logo):
-    text(X0, Y0 + (first + 1 + i) * LH, escape(row), t + i * 0.05, C['arch'],
-         'font-weight="700" xml:space="preserve"')
-IX = X0 + 175
-for i, (k, v) in enumerate(info):
-    y = Y0 + (first + i) * LH
-    if i == 0:
-        content = (f'<tspan fill="{C["green"]}" font-weight="700">{k}</tspan>'
-                   f'<tspan fill="{C["text"]}">{v}</tspan>')
-    elif v is None:
-        content = f'<tspan fill="{C["dim"]}">{k}</tspan>'
-    else:
-        content = (f'<tspan fill="{C["gold"]}" font-weight="700">{k}</tspan>'
-                   f'<tspan x="{IX + 78}" fill="{C["text"]}">{escape(v)}</tspan>')
-    text(IX, y, content, t + 0.3 + i * 0.12)
-line = first + len(info)
-palette = ['#484f58', C['red'], C['green'], C['gold'], C['blue'], C['purple'], '#39c5cf', '#f0f6fc']
-blocks = ''.join(f'<rect x="{IX + j * 22}" y="{Y0 + line * LH - 11}" width="18" height="12" rx="2" fill="{c}"/>'
-                 for j, c in enumerate(palette))
-parts.append(f'<g opacity="0">{blocks}{show(t + 0.3 + len(info) * 0.12)}</g>')
-t += 0.3 + len(info) * 0.12 + 0.5
+for i, (c, s) in enumerate(now):
+    line += 1
+    text(X0, Y0 + line * LH, span(s, c, i == 0), t + i * 0.12)
+t += len(now) * 0.12 + 0.6
 
-# Lema.
-line += 2
-t = prompt(line, t, 'cat playground.txt')
-line += 1
-text(X0, Y0 + line * LH,
-     f'<tspan fill="{C["purple"]}">"Math, Logic &amp; Cybersecurity are my playgrounds"</tspan>', t + 0.35)
-t += 0.9
-
-# xkcd 149.
-line += 2
-t = prompt(line, t, 'sudo make me-a-sandwich')
-line += 1
-y = Y0 + line * LH
-stars = ''.join(letter('*', t + 0.6 + i * 0.09) for i in range(8))
-text(X0, y, f'<tspan fill="{C["dim"]}">[sudo] password for pablo: {stars}</tspan>', t + 0.3)
-t += 0.6 + 8 * 0.09 + 0.4
-line += 1
-text(X0, Y0 + line * LH, f'<tspan fill="{C["green"]}">okay.</tspan>', t)
-t += 0.6
-
-# Prompt final con cursor parpadeante (un bloque █ dentro del mismo <text>).
+# 3. idle prompt with a blinking block cursor ---------------------------------
 line += 2
 y = Y0 + line * LH
-p = (f'<tspan fill="{C["green"]}" font-weight="700">pablo@slylem0</tspan>'
-     f'<tspan fill="{C["text"]}">:</tspan><tspan fill="{C["blue"]}" font-weight="700">~</tspan>'
-     f'<tspan fill="{C["text"]}">$ </tspan>')
-cursor = (f'<tspan fill="{C["text"]}">█<animate attributeName="fill-opacity" values="1;0" '
-          f'dur="1s" repeatCount="indefinite" calcMode="discrete"/></tspan>')
-parts.append(f'<text x="{X0}" y="{y}" opacity="0">{p}{cursor}{show(t)}</text>')
+cursor = (f'<tspan fill="{N["snow"]}">█<animate attributeName="fill-opacity" values="1;0" '
+          f'dur="1.06s" repeatCount="indefinite" calcMode="discrete"/></tspan>')
+parts.append(f'<text x="{X0}" y="{y}" opacity="0" xml:space="preserve">{prompt_spans()}{cursor}{show(t)}</text>')
 
-assert t < T * 0.95, f'la animación ({t:.1f}s) no cabe en el ciclo ({T}s)'
-H = Y0 + line * LH + 34
+assert t < T * 0.9, f'animation ({t:.1f}s) does not fit the cycle ({T}s)'
+H = int(y + 26)
 
 svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-labelledby="title desc">
 <title id="title">Pablo Nicolás Marín (Slylem0) terminal</title>
-<desc id="desc">Animated terminal: whoami prints the SLYLEM0 banner, fastfetch shows Omarchy, Hyprland, Neovim and an AWS, TypeScript, Python, C++, Java and Go stack, then "Math, Logic and Cybersecurity are my playgrounds".</desc>
-<defs>
-  <linearGradient id="shine" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="520" y2="0">
-    <stop offset="0" stop-color="#c8a56a"/>
-    <stop offset="0.42" stop-color="#e3b341"/>
-    <stop offset="0.5" stop-color="#fff4d6"/>
-    <stop offset="0.58" stop-color="#e3b341"/>
-    <stop offset="1" stop-color="#c8a56a"/>
-    <animateTransform attributeName="gradientTransform" type="translate" values="-520 0;520 0" dur="3.5s" repeatCount="indefinite"/>
-  </linearGradient>
-  <filter id="glow" x="-5%" y="-30%" width="110%" height="160%">
-    <feGaussianBlur stdDeviation="1.6" result="b"/>
-    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-  </filter>
-  <pattern id="scan" width="4" height="4" patternUnits="userSpaceOnUse">
-    <rect width="4" height="2" fill="#ffffff" opacity="0.025"/>
-  </pattern>
-</defs>
-<rect width="{W}" height="{H}" rx="12" fill="{C['bg']}" stroke="{C['border']}"/>
-<path d="M0 12a12 12 0 0 1 12-12h{W - 24}a12 12 0 0 1 12 12v24H0z" fill="{C['bar']}"/>
-<line x1="0" y1="36" x2="{W}" y2="36" stroke="{C['border']}"/>
-<circle cx="22" cy="18" r="6" fill="#ff5f57"/><circle cx="42" cy="18" r="6" fill="#febc2e"/><circle cx="62" cy="18" r="6" fill="#28c840"/>
-<text x="{W / 2}" y="23" text-anchor="middle" fill="{C['dim']}" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5">pablo@slylem0: ~ — ghostty</text>
-<g font-family="'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="{FS}" fill="{C['text']}">
+<desc id="desc">Animated Ghostty terminal on Omarchy with the Nord theme: fastfetch prints the Omarchy logo with my profile, software and AWS stack, then cat now.md shows what I am working on.</desc>
+<rect x="1.5" y="1.5" width="{W - 3}" height="{H - 3}" rx="8" fill="{N['bg']}" stroke="{N['border']}" stroke-width="2"/>
+<g font-family="'JetBrains Mono', 'JetBrainsMono Nerd Font', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="{FS}" fill="{N['text']}">
 {chr(10).join(parts)}
 </g>
-<rect x="1" y="37" width="{W - 2}" height="{H - 38}" fill="url(#scan)" pointer-events="none"/>
 </svg>
 '''
 open(OUT, 'w', encoding='utf-8').write(svg)
-print(f'{OUT}: {W}x{H}, ciclo {T}s, animación {t:.1f}s')
+print(f'{OUT}: {W}x{H}, cycle {T}s, animation {t:.1f}s')
