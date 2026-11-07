@@ -1,0 +1,42 @@
+# Every night: read my public GitHub activity, then redraw the terminal (latest
+# commits) and the Pisces koi (contribution graph) and commit them if they changed.
+name: Profile
+
+on:
+  schedule:
+    - cron: "20 5 * * *"   # 00:20 in Colombia
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [scripts/**, .github/workflows/profile.yml]
+
+permissions:
+  contents: write
+
+concurrency: profile
+
+jobs:
+  draw:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Fetch activity
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/fetch.py "${{ github.repository_owner }}" data.json
+      - name: Draw
+        run: |
+          python scripts/gen_terminal.py data.json scripts/omarchy-logo.txt assets/terminal.svg
+          python scripts/gen_pisces.py data.json assets/pisces.svg
+      - name: Commit if changed
+        run: |
+          git add assets/terminal.svg assets/pisces.svg
+          if git diff --cached --quiet; then echo "Nothing changed."; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --quiet --message "profile: redraw terminal and koi"
+          git push --quiet

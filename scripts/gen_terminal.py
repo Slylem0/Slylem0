@@ -4,14 +4,19 @@ It mirrors my real setup: a Ghostty window tiled by Hyprland on Omarchy,
 Nord colours, my starship prompt and my fastfetch layout (Omarchy logo plus
 boxed sections). Animation is SMIL only, which GitHub renders inside <img>.
 
-Usage: python gen_terminal.py <out.svg> <omarchy-logo.txt>
+It is redrawn every night with my latest commits (data.json from fetch.py).
+
+Usage: python scripts/gen_terminal.py <data.json> <omarchy-logo.txt> <out.svg>
 """
+import json
 import sys
+from datetime import datetime, timedelta, timezone
 from html import escape
 
-OUT, LOGO = sys.argv[1], sys.argv[2]
+DATA, LOGO, OUT = sys.argv[1], sys.argv[2], sys.argv[3]
+data = json.load(open(DATA))
 
-T = 16.0                       # full cycle (s), then it starts over
+T = 20.0                       # full cycle (s), then it starts over
 W, LH, FS = 900, 19, 13
 X0, Y0 = 28, 44
 CW = 7.8                       # monospace cell width at FS 13 (JetBrains Mono)
@@ -73,11 +78,11 @@ for r, row in enumerate(logo):
             s = c
             while c < len(row) and row[c] == '█':
                 c += 1
-            rects.append(f'<rect x="{lx + s * PX:.1f}" y="{ly + r * PY:.1f}" width="{(c - s) * PX:.1f}" height="{PY:.1f}"/>')
+            rects.append(f'<rect x="{lx + s * PX:.1f}" y="{ly + r * PY:.1f}" width="{(c - s) * PX:.1f}" height="{PY + 0.6:.1f}"/>')
         else:
             c += 1
 logo_h = len(logo) * PY
-parts.append(f'<g fill="{N["frost"]}" opacity="0">{"".join(rects)}{show(t)}</g>')
+parts.append(f'<g fill="{N["frost"]}" shape-rendering="crispEdges" opacity="0">{"".join(rects)}{show(t)}</g>')
 
 BX = lx + 56 * PX + 34          # info column
 BOXW = 52                       # inner width in cells
@@ -133,23 +138,35 @@ logo_bottom = ly + logo_h
 # center the logo against the info column
 shift = ((info_bottom - (Y0 + (line + 1) * LH)) - logo_h) / 2
 parts[1] = parts[1].replace('<g fill=', f'<g transform="translate(0 {shift:.1f})" fill=', 1)
-line = row + 1
+line = row + 2
 t = tt
 
-# 2. what I'm on now -------------------------------------------------------
+# 2. my latest commits (real, refreshed nightly) ----------------------------
+t = prompt(line, t, f'gh search commits --author {data["login"]} --sort committer-date --limit 3')
+MON = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split()
+for i, c in enumerate(data['commits'][:3]):
+    line += 1
+    msg = c['msg'] if len(c['msg']) <= 58 else c['msg'][:57] + '…'
+    when = f"{MON[int(c['date'][5:7]) - 1]} {c['date'][8:10]}"
+    content = (span(f"{c['repo'][:16]:<17}", N['frost'], True) + span(c['sha'] + '  ', N['yellow'])
+               + span(f'{msg:<59}', N['text']) + span(when, N['dim']))
+    text(X0, Y0 + line * LH, content, t + i * 0.12)
+t += 3 * 0.12 + 0.5
+line += 2
+
+# 3. what I'm on now -------------------------------------------------------
 t = prompt(line, t, 'cat now.md')
 now = [
-    (N['frost'], '## now'),
     (N['text'], '- Shipping serverless backends on AWS from a Linux terminal in Buga, Colombia.'),
     (N['text'], '- Latest: SEE YOU SPACE BUILDER, my portfolio with Amazon Bedrock inside.'),
     (N['text'], '- Next: AWS Certified AI Practitioner.'),
 ]
 for i, (c, s) in enumerate(now):
     line += 1
-    text(X0, Y0 + line * LH, span(s, c, i == 0), t + i * 0.12)
+    text(X0, Y0 + line * LH, span(s, c), t + i * 0.12)
 t += len(now) * 0.12 + 0.6
 
-# 3. idle prompt with a blinking block cursor ---------------------------------
+# 4. idle prompt with a blinking block cursor ---------------------------------
 line += 2
 y = Y0 + line * LH
 cursor = (f'<tspan fill="{N["snow"]}">█<animate attributeName="fill-opacity" values="1;0" '
@@ -159,12 +176,36 @@ parts.append(f'<text x="{X0}" y="{y}" opacity="0" xml:space="preserve">{prompt_s
 assert t < T * 0.9, f'animation ({t:.1f}s) does not fit the cycle ({T}s)'
 H = int(y + 26)
 
-svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-labelledby="title desc">
+TOP, GAPS = 30, 8                 # waybar height, Hyprland gaps
+WH = H                             # terminal window height
+SH = TOP + GAPS + WH + GAPS        # whole screen height
+col = datetime.now(timezone(timedelta(hours=-5)))
+clock = col.strftime('%A %H:%M')
+FONT = "'JetBrains Mono', 'JetBrainsMono Nerd Font', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace"
+ws = ''.join(
+    f'<text x="{40 + i * 22}" y="20" text-anchor="middle" fill="{N["snow"] if i == 0 else N["dim"]}"'
+    f'{" font-weight=\"700\"" if i == 0 else ""}>{i + 1}</text>' for i in range(5))
+# right side: wifi arcs and a battery, drawn so they need no icon font
+right = (f'<g transform="translate({W - 76} 9)" fill="none" stroke="{N["text"]}" stroke-width="1.6" stroke-linecap="round">'
+         f'<path d="M0,6 Q7,-1 14,6"/><path d="M3,9 Q7,5 11,9"/><circle cx="7" cy="12" r="0.8" fill="{N["text"]}"/>'
+         f'<rect x="30" y="2" width="20" height="11" rx="2"/><rect x="51" y="5.5" width="2" height="4" fill="{N["text"]}"/>'
+         f'<rect x="32.5" y="4.5" width="13" height="6" fill="{N["green"]}" stroke="none"/></g>'
+         )
+svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{SH}" viewBox="0 0 {W} {SH}" role="img" aria-labelledby="title desc">
 <title id="title">Pablo Nicolás Marín (Slylem0) terminal</title>
-<desc id="desc">Animated Ghostty terminal on Omarchy with the Nord theme: fastfetch prints the Omarchy logo with my profile, software and AWS stack, then cat now.md shows what I am working on.</desc>
+<desc id="desc">My Omarchy desktop: the waybar on top and a Ghostty terminal with the Nord theme. fastfetch prints the Omarchy logo with my profile, software and AWS stack, gh shows my latest commits, and cat now.md shows what I am working on.</desc>
+<rect width="{W}" height="{SH}" rx="10" fill="#242933"/>
+<g font-family="{FONT}" font-size="12.5">
+<g transform="translate(14 7)" fill="{N['frost']}"><rect x="0" y="0" width="14" height="14" fill="none" stroke="{N['frost']}" stroke-width="2.4"/><rect x="5" y="5" width="4" height="4"/></g>
+{ws}
+<text x="{W / 2}" y="20" text-anchor="middle" fill="{N['text']}">{clock}</text>
+{right}
+</g>
+<g transform="translate({GAPS} {TOP + GAPS}) scale({(W - 2 * GAPS) / W:.5f})">
 <rect x="1.5" y="1.5" width="{W - 3}" height="{H - 3}" rx="8" fill="{N['bg']}" stroke="{N['border']}" stroke-width="2"/>
-<g font-family="'JetBrains Mono', 'JetBrainsMono Nerd Font', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="{FS}" fill="{N['text']}">
+<g font-family="{FONT}" font-size="{FS}" fill="{N['text']}">
 {chr(10).join(parts)}
+</g>
 </g>
 </svg>
 '''
