@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./assets/terminal.svg" width="100%" alt="Ghostty terminal on Omarchy with the Nord theme: fastfetch shows the Omarchy logo with my profile, software and AWS stack, then cat now.md shows what I am working on." />
+<img src="./assets/terminal.svg" width="100%" alt="A Claude Code session in my terminal: who is pablo? It runs fastfetch with my profile and stack, answers, lists my latest commits, and my status line shows my GitHub stats with Clawd." />
 
 <br/>
 
@@ -79,6 +79,10 @@ A guardrail that stops scam emails from hijacking an AI assistant that pays a 72
   <img src="https://skillicons.dev/icons?i=linux,arch,neovim,bash,git,githubactions,docker,qt&perline=10" alt="Linux, Arch, Neovim, Bash, Git, GitHub Actions, Docker, Qt" />
 </p>
 
-## `$ git koi --pisces`
+## `$ git koi --pond`
 
-<img src="./assets/pisces.svg" width="100%" alt="My real GitHub contribution graph with two koi, a white-and-red one and a dark one, circling it like the Pisces sign. They grow as they eat the days with commits. Redrawn every night." />
+<p align="center">
+  <img src="./assets/pond.gif" width="100%" alt="Two koi drawn by git-koi from my GitHub activity, a white one and a black one, swimming mirrored like the Pisces sign in a pond. Under the pond is my real contribution graph; every recent day with commits sends food up into the water and the koi eat it. Redrawn every night." />
+  <br/>
+  <sub>Koi drawn every night from my public activity by <a href="https://github.com/yalongwastaken/git-koi">git-koi</a>; the pond, the food and the Pisces pair are mine.</sub>
+</p>

@@ -1,211 +1,195 @@
-"""Generate assets/terminal.svg: an animated terminal for the profile README.
+"""Generate assets/terminal.svg: my profile as a Claude Code session in my kitty.
 
-It mirrors my real setup: a Ghostty window tiled by Hyprland on Omarchy,
-Nord colours, my starship prompt and my fastfetch layout (Omarchy logo plus
-boxed sections). Animation is SMIL only, which GitHub renders inside <img>.
+Same look as my real setup: the darker background I switch to while Claude
+runs, the "Omarchy vivo" colours, the blue prompt rules, my status line and
+Clawd in the corner. Commits and stats are real and redrawn every night.
+Animation is SMIL only, which GitHub renders inside <img>.
 
-It is redrawn every night with my latest commits (data.json from fetch.py).
-
-Usage: python scripts/gen_terminal.py <data.json> <omarchy-logo.txt> <out.svg>
+Usage: python scripts/gen_terminal.py <data.json> <out.svg>
 """
 import json
 import sys
 from datetime import datetime, timedelta, timezone
 from html import escape
 
-DATA, LOGO, OUT = sys.argv[1], sys.argv[2], sys.argv[3]
-data = json.load(open(DATA))
+DATA, OUT = sys.argv[1], sys.argv[2]
+d = json.load(open(DATA))
 
-T = 20.0                       # full cycle (s), then it starts over
-W, LH, FS = 900, 19, 13
-X0, Y0 = 28, 44
-CW = 7.8                       # monospace cell width at FS 13 (JetBrains Mono)
-
-N = {  # Nord
-    'bg': '#2e3440', 'bg2': '#3b4252', 'border': '#88c0d0', 'text': '#d8dee9',
-    'snow': '#eceff4', 'dim': '#616e88', 'frost': '#88c0d0', 'frost2': '#81a1c1',
-    'frost3': '#5e81ac', 'green': '#a3be8c', 'yellow': '#ebcb8b', 'orange': '#d08770',
-    'red': '#bf616a', 'purple': '#b48ead',
+W, LH, FS = 900, 21, 13.5
+X0, XT = 26, 50                 # bullet column, text column
+T = 22.0
+C = {  # Omarchy vivo (my Claude Code theme) on the dark kitty background
+    'bg': '#1b1f27', 'band': '#26354b', 'blue': '#5faafa', 'text': '#d8dee9', 'snow': '#eceff4',
+    'dim': '#7b8394', 'subtle': '#4c566a', 'green': '#a3be8c', 'yellow': '#ebcb8b', 'red': '#bf616a',
+    'frost': '#88c0d0', 'purple': '#b48ead', 'orange': '#d5795a', 'auto': '#d5967a',
 }
 parts = []
 
 
-def show(t, attr='opacity'):
-    """Appears at second t and stays until the end of the cycle."""
-    return (f'<animate attributeName="{attr}" values="0;1;0" keyTimes="0;{t / T:.4f};0.985" '
+def show(t):
+    return (f'<animate attributeName="opacity" values="0;1;0" keyTimes="0;{t / T:.4f};0.985" '
             f'dur="{T}s" repeatCount="indefinite" calcMode="discrete"/>')
 
 
-def letter(ch, t):
-    ch = escape(ch) if ch != ' ' else '&#160;'
-    return f'<tspan fill-opacity="0">{ch}{show(t, "fill-opacity")}</tspan>'
-
-
-def text(x, y, content, t, extra=''):
-    parts.append(f'<text x="{x:.1f}" y="{y}" opacity="0" xml:space="preserve" {extra}>{content}{show(t)}</text>')
-
-
-def span(s, color, bold=False):
+def sp(s, color, bold=False):
     b = ' font-weight="700"' if bold else ''
     return f'<tspan fill="{color}"{b}>{escape(s)}</tspan>'
 
 
-def prompt_spans(path='~'):
-    # starship: user, dir, then the arrow
-    return span('pablo ', N['snow'], True) + span(path + ' ', N['frost'], True) + span('❯ ', N['green'], True)
+def line_at(y, content, t, x=XT):
+    parts.append(f'<text x="{x}" y="{y}" opacity="0" xml:space="preserve">{content}{show(t)}</text>')
 
 
-def prompt(line, t, cmd, step=0.06):
-    y = Y0 + line * LH
-    letters = ''.join(letter(ch, t + 0.3 + i * step) for i, ch in enumerate(cmd))
-    parts.append(f'<text x="{X0}" y="{y}" opacity="0" xml:space="preserve">{prompt_spans()}'
-                 f'<tspan fill="{N["text"]}">{letters}</tspan>{show(t)}</text>')
-    return t + 0.3 + len(cmd) * step + 0.35
+y = 40
+t = 0.3
+
+# 1. my message, on the highlighted band ---------------------------------------
+q = 'who is pablo?'
+letters = ''.join(
+    f'<tspan fill-opacity="0">{escape(ch) if ch != " " else "&#160;"}'
+    f'<animate attributeName="fill-opacity" values="0;1;0" keyTimes="0;{(t + 0.2 + i * 0.07) / T:.4f};0.985" '
+    f'dur="{T}s" repeatCount="indefinite" calcMode="discrete"/></tspan>' for i, ch in enumerate(q))
+parts.append(f'<g opacity="0"><rect x="14" y="{y - 15}" width="{W - 28}" height="24" rx="3" fill="{C["band"]}"/>'
+             f'<text x="{X0}" y="{y + 1}" xml:space="preserve">{sp("❯ ", C["dim"])}<tspan fill="{C["text"]}">{letters}</tspan></text>'
+             f'{show(t)}</g>')
+t += 0.2 + len(q) * 0.07 + 0.7
+y += 2 * LH
 
 
-# 1. fastfetch -------------------------------------------------------------
-line = 0
-t = prompt(line, 0.4, 'fastfetch')
+def tool(name, arg):
+    global y, t
+    parts.append(f'<g opacity="0"><circle cx="{X0 + 4}" cy="{y - 4.5}" r="4" fill="{C["green"]}"/>'
+                 f'<text x="{XT - 8}" y="{y}" xml:space="preserve">{sp(name, C["snow"], True)}{sp("(" + arg + ")", C["text"])}</text>{show(t)}</g>')
+    y += LH
+    t += 0.45
 
-logo = [r.rstrip('\n') for r in open(LOGO, encoding='utf-8').read().splitlines() if r.strip()]
-PX, PY = 4.0, 8.0               # one logo cell as a pixel block
-lx, ly = X0 + 4, Y0 + (line + 1) * LH + 2
-rects = []
-for r, row in enumerate(logo):
-    c = 0
-    while c < len(row):
-        if row[c] == '█':
-            s = c
-            while c < len(row) and row[c] == '█':
-                c += 1
-            rects.append(f'<rect x="{lx + s * PX:.1f}" y="{ly + r * PY:.1f}" width="{(c - s) * PX:.1f}" height="{PY + 0.6:.1f}"/>')
-        else:
-            c += 1
-logo_h = len(logo) * PY
-parts.append(f'<g fill="{N["frost"]}" shape-rendering="crispEdges" opacity="0">{"".join(rects)}{show(t)}</g>')
 
-BX = lx + 56 * PX + 34          # info column
-BOXW = 52                       # inner width in cells
-sections = [
-    ('Profile', [
-        ('', 'Name', 'Pablo Nicolás Marín'),
-        ('', 'Role', 'Cloud & Backend Builder'),
-        ('', 'Study', 'Systems Engineering · Universidad del Valle'),
-        ('', 'Cert', 'AWS Certified Cloud Practitioner'),
-        ('', 'Club', 'AWS Student Builder Group Univalle'),
-    ]),
-    ('Software', [
-        ('', 'OS', 'Omarchy (Arch Linux)'),
-        ('', 'WM', 'Hyprland (Wayland)'),
-        ('', 'Term', 'Ghostty · tmux · starship'),
-        ('', 'Editor', 'Neovim (LazyVim)'),
-        ('', 'Theme', 'Nord'),
-    ]),
-    ('Stack', [
-        ('', 'Cloud', 'Lambda · DynamoDB · Bedrock · CDK · Amplify'),
-        ('', 'Langs', 'TypeScript · Python · C++ · Go · Java'),
-    ]),
+def out_lines(rows, step=0.09):
+    global y, t
+    for i, content in enumerate(rows):
+        if i == 0:
+            line_at(y, sp('⎿', C['dim']), t, XT - 4)
+        line_at(y, content, t, XT + 18)
+        y += LH
+        t += step
+    y += LH * 0.6
+    t += 0.35
+
+
+# 2. fastfetch ----------------------------------------------------------------------
+tool('Bash', 'fastfetch')
+K = lambda k: sp(f'{k:<9}', C['blue'], True)
+out_lines([
+    K('name') + sp('Pablo Nicolás Marín', C['text']),
+    K('role') + sp('Cloud & Backend Builder · Buga, Colombia', C['text']),
+    K('study') + sp('Systems Engineering · Universidad del Valle', C['text']),
+    K('cert') + sp('AWS Certified Cloud Practitioner', C['text']),
+    K('club') + sp('AWS Student Builder Group Univalle · Partnerships & Academy Lead', C['text']),
+    K('stack') + sp('Lambda · DynamoDB · Bedrock · CDK · Amplify · TypeScript · Python · C++ · Go', C['text']),
+    K('setup') + sp('Omarchy · Hyprland · kitty · Neovim · Nord', C['text']),
+])
+
+# 3. the answer -----------------------------------------------------------------------
+parts.append(f'<g opacity="0"><circle cx="{X0 + 4}" cy="{y - 4.5}" r="4" fill="{C["snow"]}"/>{show(t)}</g>')
+answer = [
+    sp('Pablo builds ', C['text']) + sp('serverless backends on AWS', C['snow'], True)
+    + sp(' and ', C['text']) + sp('AI agents on Amazon Bedrock', C['snow'], True) + sp(',', C['text']),
+    sp('straight from a Linux terminal. Latest: ', C['text']) + sp('SEE YOU SPACE BUILDER', C['blue'], True)
+    + sp(', a portfolio with a secret', C['text']),
+    sp('tiling desktop and three AI cores that vote. Next stop: ', C['text'])
+    + sp('AWS Certified AI Practitioner', C['snow'], True) + sp('.', C['text']),
 ]
-row = line + 1
-tt = t + 0.25
-BW = W - BX - 34                # box width in px
-for title, items in sections:
-    top = Y0 + row * LH - 5     # box top edge sits on the title's middle
-    bottom = Y0 + (row + len(items)) * LH + 9
-    tw = len(title) * CW + 14
-    tx = BX + (BW - tw) / 2
-    box = (f'<rect x="{BX}" y="{top}" width="{BW}" height="{bottom - top}" rx="3" fill="none" stroke="{N["dim"]}"/>'
-           f'<rect x="{tx:.1f}" y="{top - 8}" width="{tw:.1f}" height="16" fill="{N["bg"]}"/>'
-           f'<text x="{tx + 7:.1f}" y="{top + 4}" fill="{N["frost3"]}">{escape(title)}</text>')
-    parts.append(f'<g opacity="0">{box}{show(tt)}</g>')
-    tt += 0.08
-    row += 1
-    for i, (_, k, v) in enumerate(items):
-        content = span(f'{k:<7}', N['frost2'], True) + span(v, N['text'])
-        text(BX + 16, Y0 + row * LH, content, tt)
-        tt += 0.08
-        row += 1
-    row += 1
-row -= 1
-# Colour row, like fastfetch's palette module.
-pal = [N['red'], N['orange'], N['yellow'], N['green'], N['frost'], N['frost3'], N['purple'], N['snow']]
-row += 1
-dots = ''.join(f'<circle cx="{BX + 14 + j * 20}" cy="{Y0 + row * LH - 4}" r="5.5" fill="{c}"/>' for j, c in enumerate(pal))
-parts.append(f'<g opacity="0">{dots}{show(tt)}</g>')
-tt += 0.4
-info_bottom = Y0 + row * LH
-logo_bottom = ly + logo_h
-# center the logo against the info column
-shift = ((info_bottom - (Y0 + (line + 1) * LH)) - logo_h) / 2
-parts[1] = parts[1].replace('<g fill=', f'<g transform="translate(0 {shift:.1f})" fill=', 1)
-line = row + 2
-t = tt
+for i, a in enumerate(answer):
+    line_at(y, a, t + i * 0.25, XT - 8)
+    y += LH
+t += len(answer) * 0.25 + 0.5
+y += LH * 0.6
 
-# 2. my latest commits (real, refreshed nightly) ----------------------------
-t = prompt(line, t, f'gh search commits --author {data["login"]} --sort committer-date --limit 3')
+# 4. latest commits (real) ---------------------------------------------------------------
+tool('Bash', f'gh search commits --author {d["login"]} --limit 3')
 MON = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split()
-for i, c in enumerate(data['commits'][:3]):
-    line += 1
-    msg = c['msg'] if len(c['msg']) <= 58 else c['msg'][:57] + '…'
+rows = []
+for c in d['commits'][:3]:
+    msg = c['msg'] if len(c['msg']) <= 60 else c['msg'][:59] + '…'
     when = f"{MON[int(c['date'][5:7]) - 1]} {c['date'][8:10]}"
-    content = (span(f"{c['repo'][:16]:<17}", N['frost'], True) + span(c['sha'] + '  ', N['yellow'])
-               + span(f'{msg:<59}', N['text']) + span(when, N['dim']))
-    text(X0, Y0 + line * LH, content, t + i * 0.12)
-t += 3 * 0.12 + 0.5
-line += 2
+    rows.append(sp(c['sha'] + '  ', C['yellow']) + sp(f"{c['repo'][:15]:<16}", C['frost'], True)
+                + sp(f'{msg:<61}', C['text']) + sp(when, C['dim']))
+out_lines(rows)
 
-# 3. what I'm on now -------------------------------------------------------
-t = prompt(line, t, 'cat now.md')
-now = [
-    (N['text'], '- Shipping serverless backends on AWS from a Linux terminal in Buga, Colombia.'),
-    (N['text'], '- Latest: SEE YOU SPACE BUILDER, my portfolio with Amazon Bedrock inside.'),
-    (N['text'], '- Next: AWS Certified AI Practitioner.'),
-]
-for i, (c, s) in enumerate(now):
-    line += 1
-    text(X0, Y0 + line * LH, span(s, c), t + i * 0.12)
-t += len(now) * 0.12 + 0.6
+# 5. the "done" line, like Claude Code prints after a turn -----------------------------
+now = datetime.now(timezone(timedelta(hours=-5)))
+line_at(y, sp('✻ ', C['dim']) + sp(f'Crunched {d["total"]} contributions · done {now.strftime("%I:%M %p").lstrip("0")}', C['dim']), t, X0)
+t += 0.5
+y += LH * 1.5
 
-# 4. idle prompt with a blinking block cursor ---------------------------------
-line += 2
-y = Y0 + line * LH
-cursor = (f'<tspan fill="{N["snow"]}">█<animate attributeName="fill-opacity" values="1;0" '
-          f'dur="1.06s" repeatCount="indefinite" calcMode="discrete"/></tspan>')
-parts.append(f'<text x="{X0}" y="{y}" opacity="0" xml:space="preserve">{prompt_spans()}{cursor}{show(t)}</text>')
+# 6. prompt box with blinking cursor ----------------------------------------------------
+top, bottom = y - 15, y + LH - 2
+cursor = (f'<rect x="{X0 + 17}" y="{y - 13}" width="9" height="17" fill="none" stroke="{C["snow"]}" stroke-width="1.4">'
+          f'<animate attributeName="opacity" values="1;0" dur="1.06s" repeatCount="indefinite" calcMode="discrete"/></rect>')
+parts.append(f'<g opacity="0"><line x1="14" y1="{top}" x2="{W - 14}" y2="{top}" stroke="{C["blue"]}" stroke-width="1.5"/>'
+             f'<text x="{X0}" y="{y + 1}">{sp("❯", C["dim"])}</text>{cursor}'
+             f'<line x1="14" y1="{bottom}" x2="{W - 14}" y2="{bottom}" stroke="{C["blue"]}" stroke-width="1.5"/>{show(t)}</g>')
+y = bottom + LH + 6
+
+# 7. status line + Clawd ------------------------------------------------------------------
+days = [n for w in d['weeks'] for _, n, _ in w]
+active = sum(1 for n in days if n)
+fill = round(16 * active / max(1, len(days)))
+bar = sp('━' * max(1, fill), C['green']) + sp('╌' * (16 - fill), C['subtle'])
+s1 = (sp(d['login'], C['blue'], True) + sp('  ·  active days ', C['dim']) + bar
+      + sp(f' {round(100 * active / max(1, len(days)))}% {active}/{len(days)}', C['text']) + sp('  ·  ', C['dim'])
+      + sp(f'{d["total"]}', C['snow'], True) + sp(' contributions', C['dim']))
+s2 = (sp('streak ', C['dim']) + sp(str(d['streak']), C['green'], True) + sp('  ·  best ', C['dim'])
+      + sp(str(d['best']), C['yellow'], True) + sp('  ·  repos ', C['dim']) + sp(str(d['repos']), C['text'])
+      + sp('  ·  followers ', C['dim']) + sp(str(d['followers']), C['text']) + sp('  ·  ', C['dim'])
+      + sp('+commits ', C['green']) + sp('-bugs', C['red']))
+line_at(y, s1, t, XT)
+line_at(y + LH, s2, t, XT)
+line_at(y + 2 * LH + 10, sp('▸▸ ', C['yellow']) + sp('auto mode on', C['yellow']) + sp(' (shift+tab to cycle)', C['dim']), t, XT)
+
+# Clawd, from the same block characters my status line uses, as 2x2 sub-pixels.
+QUAD = {'█': 'abcd', '▐': 'bd', '▌': 'ac', '▛': 'abc', '▜': 'abd', '▙': 'acd', '▟': 'bcd',
+        '▝': 'b', '▘': 'a', '▗': 'd', '▖': 'c', '▀': 'ab', '▄': 'cd', ' ': '', '^': ''}
+PX, PY = 6.0, 10.5
+
+
+def clawd(rows, ox, oy):
+    rects = []
+    for r, row in enumerate(rows):
+        for c, ch in enumerate(row):
+            for q in QUAD.get(ch, ''):
+                dx, dy = (q in 'bd'), (q in 'cd')
+                rects.append(f'<rect x="{ox + (2 * c + dx) * PX:.1f}" y="{oy + (2 * r + dy) * PY:.1f}" '
+                             f'width="{PX + 0.3:.1f}" height="{PY + 0.3:.1f}"/>')
+    return ''.join(rects)
+
+
+cx, cy = W - 9 * 2 * PX - 60, y - 16
+open_eyes = clawd([' ▐▛███▜▌ ', '▝▜█████▛▘', '  ▘▘ ▝▝  '], cx, cy)
+closed = clawd([' ▐▀███▀▌ ', '▝▜█████▛▘', '  ▘▘ ▝▝  '], cx, cy)
+blink = 'values="1;1;0;1" keyTimes="0;0.9;0.93;0.97" dur="4s" repeatCount="indefinite" calcMode="discrete"'
+parts.append(f'<g opacity="0" fill="{C["orange"]}" shape-rendering="crispEdges">'
+             f'<g><animate attributeName="opacity" {blink}/>{open_eyes}</g>'
+             f'<g opacity="0"><animate attributeName="opacity" values="0;0;1;0" keyTimes="0;0.9;0.93;0.97" dur="4s" repeatCount="indefinite" calcMode="discrete"/>{closed}</g>'
+             f'{show(t)}</g>')
+parts.append(f'<text x="{cx - 14}" y="{cy + 10}" text-anchor="end" opacity="0" fill="{C["dim"]}">zZz{show(t)}</text>')
 
 assert t < T * 0.9, f'animation ({t:.1f}s) does not fit the cycle ({T}s)'
-H = int(y + 26)
-
-TOP, GAPS = 30, 8                 # waybar height, Hyprland gaps
-WH = H                             # terminal window height
-SH = TOP + GAPS + WH + GAPS        # whole screen height
-col = datetime.now(timezone(timedelta(hours=-5)))
-clock = col.strftime('%A %H:%M')
+H = int(y + 2 * LH + 34)
 FONT = "'JetBrains Mono', 'JetBrainsMono Nerd Font', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace"
-ws = ''.join(
-    f'<text x="{40 + i * 22}" y="20" text-anchor="middle" fill="{N["snow"] if i == 0 else N["dim"]}"'
-    f'{" font-weight=\"700\"" if i == 0 else ""}>{i + 1}</text>' for i in range(5))
-# right side: wifi arcs and a battery, drawn so they need no icon font
-right = (f'<g transform="translate({W - 76} 9)" fill="none" stroke="{N["text"]}" stroke-width="1.6" stroke-linecap="round">'
-         f'<path d="M0,6 Q7,-1 14,6"/><path d="M3,9 Q7,5 11,9"/><circle cx="7" cy="12" r="0.8" fill="{N["text"]}"/>'
-         f'<rect x="30" y="2" width="20" height="11" rx="2"/><rect x="51" y="5.5" width="2" height="4" fill="{N["text"]}"/>'
-         f'<rect x="32.5" y="4.5" width="13" height="6" fill="{N["green"]}" stroke="none"/></g>'
-         )
-svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{SH}" viewBox="0 0 {W} {SH}" role="img" aria-labelledby="title desc">
-<title id="title">Pablo Nicolás Marín (Slylem0) terminal</title>
-<desc id="desc">My Omarchy desktop: the waybar on top and a Ghostty terminal with the Nord theme. fastfetch prints the Omarchy logo with my profile, software and AWS stack, gh shows my latest commits, and cat now.md shows what I am working on.</desc>
-<rect width="{W}" height="{SH}" rx="10" fill="#242933"/>
-<g font-family="{FONT}" font-size="12.5">
-<g transform="translate(14 7)" fill="{N['frost']}"><rect x="0" y="0" width="14" height="14" fill="none" stroke="{N['frost']}" stroke-width="2.4"/><rect x="5" y="5" width="4" height="4"/></g>
-{ws}
-<text x="{W / 2}" y="20" text-anchor="middle" fill="{N['text']}">{clock}</text>
-{right}
-</g>
-<g transform="translate({GAPS} {TOP + GAPS}) scale({(W - 2 * GAPS) / W:.5f})">
-<rect x="1.5" y="1.5" width="{W - 3}" height="{H - 3}" rx="8" fill="{N['bg']}" stroke="{N['border']}" stroke-width="2"/>
-<g font-family="{FONT}" font-size="{FS}" fill="{N['text']}">
+clock = now.strftime('%H:%M')
+svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-labelledby="title desc">
+<title id="title">Pablo Nicolás Marín (Slylem0)</title>
+<desc id="desc">A Claude Code session in my terminal: I ask "who is pablo?", it runs fastfetch with my profile and stack, answers, lists my three latest commits, and my status line shows my real GitHub stats with Clawd in the corner.</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#1d2330"/><stop offset="0.55" stop-color="{C['bg']}"/><stop offset="1" stop-color="#1a2232"/>
+  </linearGradient>
+</defs>
+<rect width="{W}" height="{H}" rx="10" fill="url(#bg)"/>
+<text x="{W - 40}" y="{H * 0.62:.0f}" text-anchor="end" font-family="{FONT}" font-size="150" font-weight="300" fill="#8fa8c8" opacity="0.05">{clock}</text>
+<g font-family="{FONT}" font-size="{FS}" fill="{C['text']}">
 {chr(10).join(parts)}
-</g>
 </g>
 </svg>
 '''
