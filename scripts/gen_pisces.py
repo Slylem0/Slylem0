@@ -121,7 +121,10 @@ A(f'<desc id="d">My GitHub contributions for the last year ({d["total"]} contrib
   'around them like the Pisces sign. They grow as they eat the days with commits.</desc>')
 A(f'<defs><path id="lap" d="{PATH}"/></defs>')
 A(f'<rect x="1.5" y="1.5" width="{W - 3}" height="{H - 3}" rx="8" fill="{BG}" stroke="{BORDER}" stroke-width="2"/>')
-FONT = "font-family=\"'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\" font-size=\"13\""
+FAM = "font-family=\"'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\""
+FONT = FAM + ' font-size="13"'
+SMALL = FAM + ' font-size="11"'
+TINY = FAM + ' font-size="10"'
 A(f'<text x="28" y="34" {FONT} fill="{TEXT}"><tspan fill="#eceff4" font-weight="700">pablo </tspan>'
   f'<tspan fill="{FROST}" font-weight="700">~ </tspan><tspan fill="#a3be8c" font-weight="700">❯ </tspan>git koi --pisces</text>')
 A(f'<text x="{W - 28}" y="34" text-anchor="end" {FONT} fill="{DIM}">'
@@ -135,7 +138,7 @@ for c, w in enumerate(weeks):
     if m != seen and c < len(weeks) - 2:
         seen = m
         name = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()[int(m) - 1]
-        A(f'<text x="{GX + c * STEP:.1f}" y="{GY - 8}" {FONT} font-size="10" fill="{DIM}">{name}</text>')
+        A(f'<text x="{GX + c * STEP:.1f}" y="{GY - 8}" {TINY} fill="{DIM}">{name}</text>')
 
 # Days. Eaten ones go dark until the lap restarts.
 for cell in cells:
@@ -188,8 +191,8 @@ for f in FISH:
         g.append('</g></g>')
         A("".join(g))
 
-A(f'<text x="28" y="{H - 18}" {FONT} font-size="11" fill="{DIM}">two koi, one per half of the year · they grow with every day of commits they eat</text>')
-A(f'<text x="{W - 28}" y="{H - 18}" text-anchor="end" {FONT} font-size="11" fill="{DIM}">updated {d["generated"]}</text>')
+A(f'<text x="28" y="{H - 18}" {SMALL} fill="{DIM}">two koi, one per half of the year · they grow with every day of commits they eat</text>')
+A(f'<text x="{W - 28}" y="{H - 18}" text-anchor="end" {SMALL} fill="{DIM}">updated {d["generated"]}</text>')
 A('</svg>')
 open(OUT, "w").write("\n".join(out))
 eaten = sum(1 for c in cells if c["eaten"])
